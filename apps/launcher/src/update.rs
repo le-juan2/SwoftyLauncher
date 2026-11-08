@@ -273,7 +273,8 @@ impl Shell {
                 | PlayState::Checking
                 | PlayState::Building
         );
-        updater::gate(&self.updates.phase, !self.updates.plan().is_empty(), busy)
+        // A pending launcher or addon update never blocks Play.
+        updater::gate(&self.updates.phase, false, busy)
     }
 
     fn start_updates(&mut self, window: &mut Window, cx: &mut Context<Self>) {

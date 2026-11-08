@@ -177,9 +177,6 @@ impl Shell {
                 return false;
             }
         }
-        if let Some(d) = swofty_core::known_problems::outdated_exe(install.version().as_deref()) {
-            window.push_notification(Notification::warning(d.text()).title(d.title).autohide(false), cx);
-        }
         if let Some(short) = crate::settings::low_space_warning(checked.room) {
             let text = trf!(
                 "{short} Settings shows what takes the room and clears old logs.",

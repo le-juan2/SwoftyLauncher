@@ -396,10 +396,6 @@ fn wrapper(store: &Store, profile: &str, args: &RunArgs, g: &Game) -> Result<Exi
     crate::offline::gate(store, false)?;
     swofty_core::entitlement::check_store_start(&g.dir, args.via_ea)?;
     crate::build::check_entitled(store, g)?;
-    let version = swofty_core::exe_version::read(&g.dir.join(GAME_EXE));
-    if let Some(d) = swofty_core::known_problems::outdated_exe(version.as_deref()) {
-        say("warning", &format!("{}: {}", d.title, d.text()));
-    }
     if let Some(reason) = swofty_core::compat::elevation_blocker(&g.dir) {
         bail!("{reason}");
     }
@@ -505,13 +501,16 @@ fn stage_offline(store: &Store, game: &Path) -> Result<()> {
     }
     let probe = swofty_core::offline::probe_cached(&store.root, game, &artifacts)?;
     if !probe.supported {
-        bail!(
-            "this F1 25 build is not supported by the offline play extension yet ({}); \
-             the modded session was refused",
-            probe.report
+        say(
+            "warning",
+            &format!(
+                "this F1 25 build is not known to the offline play extension ({}); continuing anyway",
+                probe.report
+            ),
         );
+    } else {
+        say("info", &format!("game build supported: {}", probe.report));
     }
-    say("info", &format!("game build supported: {}", probe.report));
     let journal = swofty_core::offline::journal_path(&store.root);
     let staged = swofty_core::offline::stage(game, &artifacts, &journal);
     if let Err(swofty_core::Error::MissingStock { files, version }) = &staged {
